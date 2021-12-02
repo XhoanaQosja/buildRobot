@@ -1,6 +1,4 @@
-<<<<<<< HEAD
-Description
-=======
+
 # Robocorp level II certification course
 
 The course consists in an automation task where data is read from a CSV file and filled in the respective fields on this website https://robotsparebinindustries.com/#/robot-order.
@@ -23,4 +21,4 @@ Rules for building this robot:
 ## Learning materials
 
 - [Here you can access the course in more details.](https://robocorp.com/docs/courses/build-a-robot)
->>>>>>> ffeef68 (Level II of Robocorp Certification)
+
