@@ -4,10 +4,10 @@ Documentation     Orders robots from RobotSpareBin Industries Inc.
 ...               Saves the screenshot of the ordered robot.
 ...               Embeds the screenshot of the robot to the PDF receipt.
 ...               Creates ZIP archive of the receipts and the images.
-Library           RPA.Browser
+Library           RPA.Browser.Selenium
 Library           RPA.HTTP
-Library           RPA.Tables
 Library           RPA.PDF
+Library           RPA.Tables
 Library           RPA.Archive
 Library           Dialogs
 Library           RPA.Robocorp.Vault
@@ -15,14 +15,15 @@ Library           RPA.Robocorp.Vault
 
 *** Keywords ***
 Open the robot order website
-    Open Browser   https://robotsparebinindustries.com/#/robot-order  chrome
+     Open Chrome Browser   https://robotsparebinindustries.com/#/robot-order 
+     Maximize Browser Window
 
 *** Keywords ***
 Get orders
      ${url}=       Get secret   data 
-     Download    ${url}[url]    overwrite=True 
-     ${total}=    Read table from CSV           orders.csv
-     [Return]     ${total}
+     Download      ${url}[url]    overwrite=True 
+     ${total}=     Read table from CSV     orders.csv
+     [Return]      ${total}
 
 *** Keywords ***
 Close the annoying modal
@@ -36,7 +37,9 @@ Fill the form
     Click element  xpath= //label[@for="${string}"]
     Input Text     xpath= //input[@placeholder="Enter the part number for the legs"]     ${row}[Legs]
     Input Text     xpath= //input[@placeholder="Shipping address"]    ${row}[Address]
+    Click Button    preview
     Click Button   order
+
 
 *** Keywords ***
 Store the receipt as a PDF file
@@ -46,12 +49,10 @@ Store the receipt as a PDF file
     Html To Pdf    ${receipt_html}    ${CURDIR}${/}output${/}receipts${/}receipt_${nr}.pdf
     [return]    ${CURDIR}${/}output${/}receipts${/}receipt_${nr}.pdf
 
-
-
 ***keywords***
 Wait for receipt
-   ${state}=   run keyword and return status  element should be visible    id:receipt
-   run keyword unless  ${state}  Click button   order
+   ${state}=   Run Keyword and Return Status  element should be visible    id:receipt
+   Run Keyword Unless  ${state}  Click button   order
    Element should be visible   id:receipt
 
 ***keywords***
@@ -65,8 +66,7 @@ Create a ZIP file of the receipts
 ***keywords***
 Take a screenshot of the robot
     [Arguments]  ${nr}
-    #${image_html}=    Get Element Attribute    id:robot-preview   outerHTML
-    ${image_html}=   Capture element screenshot       xpath=/html/body/div/div/div[1]/div/div[2]    ${CURDIR}${/}output${/}screenshots${/}scr_${nr}.png
+    ${image_html}=   Capture element screenshot       id:robot-preview-image    ${CURDIR}${/}output${/}screenshots${/}scr_${nr}.png
     [return]    ${CURDIR}${/}output${/}screenshots${/}scr_${nr}.png
 
 ***keywords***
@@ -91,4 +91,8 @@ Order robots from RobotSpareBin Industries Inc
        Go to order another robot
     END
     Create a ZIP file of the receipts
+      ${state}=      Get value from user  Do you want to close the browser? (Yes/No)
+    IF  '${state}'=='Yes' 
+        Close Window
+    END
 
